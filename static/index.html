@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💩 Poop Scanner - AI Health Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eaf6 100%);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .upload-area:hover::before {
+            opacity: 1;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .upload-area.dragover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #fff;
+            transform: scale(1.02);
+        }
+        
+        .upload-area.dragover .upload-icon,
+        .upload-area.dragover .upload-text,
+        .upload-area.dragover .upload-subtext {
+            color: white;
+        }
+        
+        .upload-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .upload-text {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            font-size: 1em;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .preview-section {
+            display: none;
+            margin: 30px 0;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .preview-container {
+            text-align: center;
+            background: #f5f7fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .preview-container img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .image-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+        
+        .image-info div {
+            text-align: center;
+        }
+        
+        .image-info span {
+            display: block;
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            background: linear-gradient(135deg, #ccc 0%, #999 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn:disabled::before {
+            display: none;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            margin-top: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+            animation: fadeIn 0.3s;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.3em;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        #results {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            display: none;
+            animation: slideInUp 0.5s;
+            border-left: 5px solid #667eea;
+        }
+        
+        #results h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #results .analysis-content {
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            font-size: 1.05em;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .upload-area {
+                padding: 30px;
+            }
+            
+            .upload-icon {
+                font-size: 3.5em;
+            }
+            
+            .btn {
+                padding: 15px 30px;
+                font-size: 1em;
+            }
+            
+            .image-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💩 Poop Scanner</h1>
+        <p>AI-Powered Health Analysis System</p>
+    </div>
+
+    <div class="container">
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">Click or Drag to Upload Image</div>
+            <div class="upload-subtext">Supports JPG, PNG, GIF, WEBP</div>
+        </div>
+
+        <input type="file" id="fileInput" accept="image/*">
+
+        <div class="preview-section" id="previewSection">
+            <div class="preview-container">
+                <img id="previewImage" alt="Preview">
+            </div>
+            <div class="image-info" id="imageInfo"></div>
+        </div>
+
+        <button class="btn" id="analyzeBtn" disabled>🔬 Analyze Image</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyzing your sample...</div>
+        </div>
+
+        <div id="results">
+            h3><span>✅</span>Analysis Results</h3>
+            <div class="analysis-content" id="analysisContent"></div>
+            <button class="btn btn-secondary" id="downloadBtn">📥 Download Results</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Made with ❤️ by ToiletSenpai | Poop Scanner v1.0</p>
+    </div>
+
+    <script>
+        console.log('🚀 SCRIPT STARTED!');
+        document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const imageInfo = document.getElementById('imageInfo');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const analysisContent = document.getElementById('analysisContent');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        let selectedFile = null;
+        let currentAnalysis = {};
+
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
+            }
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewSection.style.display = 'block';
+                analyzeBtn.disabled = false;
+                results.style.display = 'none';
+                
+                // Create a temporary image to get dimensions
+                const img = new Image();
+                img.onload = function() {
+                    const sizeKB = (file.size / 1024).toFixed(2);
+                    imageInfo.innerHTML = `
+                        <div><strong>${file.name}</strong><span>Filename</span></div>
+                        <div><strong>${sizeKB} KB</strong><span>File Size</span></div>
+                        <div><strong>${img.width} x ${img.height}</strong><span>Dimensions</span></div>
+                    `;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        analyzeBtn.addEventListener('click', async function() {
+            if (!selectedFile) return;
+            
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                console.log('Starting upload...');
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                console.log('Fetch completed, parsing response...');
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+
+                loading.style.display = 'none';
+
+                console.log('DEBUG - Full response:', data);
+                console.log('DEBUG - data.status value:', data.status);
+
+  if (data.status === 'success') {
+    console.log('SUCCESS! Data received:', data);
+    
+    currentAnalysis = data.analysis;
+    
+    // Parse if string
+    if (typeof analysis === 'string') {
+        console.log('Analysis is string, attempting to parse...');
+        try {
+            analysis = JSON.parse(analysis);
+            console.log('Parsed successfully:', analysis);
+        } catch (e) {
+            console.log('Parse failed, wrapping as object');
+
+        }
+    }
+    
+    // Extract values with fallbacks
+    const bristolType = (currentAnalysis && currentAnalysis.bristolType) ? currentAnalysis.bristolType : "Type 4";
+    const bristolDescription = (currentAnalysis && currentAnalysis.bristolDescription) ? currentAnalysis.bristolDescription : "Normal";
+    const healthStatus = (currentAnalysis && currentAnalysis.healthStatus) ? currentAnalysis.healthStatus : "healthy";
+    const healthScore = (currentAnalysis && currentAnalysis.healthScore) ? currentAnalysis.healthScore : 75;
+    const keyFindings = (currentAnalysis && Array.isArray(currentAnalysis.keyFindings)) ? currentAnalysis.keyFindings : [];
+    const recommendations = (currentAnalysis && Array.isArray(currentAnalysis.recommendations)) ? currentAnalysis.recommendations : [];
+    
+    let detailedAnalysis;
+    if (currentAnalysis && currentAnalysis.detailedAnalysis) {
+        detailedAnalysis = currentAnalysis.detailedAnalysis;
+    } else if (typeof currentAnalysis === 'string') {
+        detailedAnalysis = currentAnalysis;
+    } else if (currentAnalysis && typeof currentAnalysis === 'object') {
+        detailedAnalysis = JSON.stringify(currentAnalysis);
+    } else {
+        detailedAnalysis = 'Analysis complete';
+    }
+    
+    console.log('Extracted values:', { bristolType, healthStatus, healthScore, detailedAnalysis });
+    
+    // Color mapping
+    const statusColors = {
+        'healthy': '#10b981',
+        'warning': '#f59e0b',
+        'concern': '#ef4444'
+    };
+    const statusColor = statusColors[healthStatus] ? statusColors[healthStatus] : '#6b7280';
+    
+    // Find the results content element
+    const analysisContent = document.getElementById('analysisContent');
+    if (!analysisContent) {
+        console.error('ERROR: analysisContent element not found!');
+        console.log('Error: Cannot find results display area');
+        return;
+    }
+    
+    console.log('Building HTML...');
+    
+    // Build simple HTML for now to test
+    let html = '<div style="padding: 20px; background: white; border-radius: 12px;">';
+    html += '<h2>Health Score: ' + healthScore + '%</h2>';
+    html += '<p><strong>Bristol Type:</strong> ' + bristolType + '</p>';
+    html += '<p><strong>Status:</strong> ' + healthStatus + '</p>';
+    html += '<p><strong>Analysis:</strong> ' + detailedAnalysis + '</p>';
+    html += '</div>';
+    
+    console.log('Setting innerHTML...');
+    analysisContent.innerHTML = html;
+    
+    console.log('Showing results...');
+    const results = document.getElementById('results');
+    if (results) {
+        results.style.display = 'block';
+    }
+    
+    console.log('Done!');
+}
+
+            } catch (error) {
+                console.log('ERROR CAUGHT:', error);
+                console.log('ERROR MESSAGE:', error.message);
+                loading.style.display = 'none';
+                analysisContent.innerHTML = '<div style="color: red;">❌ Connection Error: ' + error.message + '</div>';
+                results.style.display = 'block';
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        console.log('🔍 Checking downloadBtn:', downloadBtn);
+if (!downloadBtn) {
+    console.error('❌ downloadBtn not found!');
+}
+
+       downloadBtn.addEventListener('click', function() {
+    const analysis = currentAnalysis || {};
+    
+    const text = `POOP SCANNER ANALYSIS
+==============================
+
+Image: ${selectedFile?.name || 'Unknown'}
+Date: ${new Date().toLocaleString()}
+
+Bristol Type: ${analysis.bristolType || 'N/A'}
+Description: ${analysis.bristolDescription || 'N/A'}
+Health Status: ${analysis.healthStatus || 'N/A'}
+Health Score: ${typeof analysis.healthScore === 'number' ? analysis.healthScore + '/100' : 'N/A'}
+Consistency: ${analysis.consistency || 'N/A'}
+
+Key Findings:
+${Array.isArray(analysis.keyFindings) ? analysis.keyFindings.map(f => '- ' + f).join('\n') : 'None'}
+
+Recommendations:
+${Array.isArray(analysis.recommendations) ? analysis.recommendations.map(r => '- ' + r).join('\n') : 'None'}
+
+Detailed Analysis:
+${analysis.detailedAnalysis || 'Complete'}
+
+==============================
+Generated by Poop Scanner v1.0
+`;
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analysis_${new Date().getTime()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+});
+});
+</script>

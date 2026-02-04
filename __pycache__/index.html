@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💩 Poop Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f5f7ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f7ff;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .result-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .status-healthy {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .status-normal {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .status-check {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💩 Poop Scanner</h1>
+        <p class="subtitle">Upload an image for health analysis</p>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📸</div>
+            <p><strong>Click to upload image</strong></p>
+            <p style="font-size: 14px; color: #999; margin-top: 10px;">or drag and drop</p>
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+        
+        <button class="btn" id="analyzeBtn" disabled>Analyze Image</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing your image...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <h2 style="margin-bottom: 20px; color: #333;">📊 Analysis Results</h2>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const resultsContent = document.getElementById('resultsContent');
+        let selectedFile = null;
+
+        fileInput.addEventListener('change', function(e) {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = ✅ Analyze: ${selectedFile.name};
+            }
+        });
+
+        analyzeBtn.addEventListener('click', async function() {
+            if (!selectedFile) return;
+
+            // Show loading
+            loading.classList.add('show');
+            results.classList.remove('show');
+            analyzeBtn.disabled = true;
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                // Send to API
+                const response = await fetch('http://127.0.0.1:8000/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                loading.classList.remove('show');
+
+                // Show results
+                if (data.status === 'success') {
+                    displayResults(data);
+                } else {
+                    resultsContent.innerHTML = `
+                        <div class="result-item">
+                            <div class="result-label">❌ Error</div>
+                            <div class="result-value">${data.message}</div>
+                        </div>
+                    `;
+                    results.classList.add('show');
+                }
+
+            } catch (error) {
+                loading.classList.remove('show');
+                resultsContent.innerHTML = `
+                    <div class="result-item">
+                        <div class="result-label">❌ Connection Error</div>
+                        <div class="result-value">Could not connect to server. Make sure your API is running!</div>
+                    </div>
+                `;
+                results.classList.add('show');
+            }
+
+            // Reset button
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = 'Analyze Image';
+        });
+
+        function displayResults(data) {
+            const analysis = data.analysis;
+            const statusClass = analysis.health_status === 'healthy' ? 'status-healthy' : 
+                               analysis.health_status === 'normal' ? 'status-normal' : 'status-check';
+
+            resultsContent.innerHTML = `
+                <div class="result-item">
+                    <div class="result-label">🎯 Brown Content</div>
+                    <div class="result-value">${analysis.brown_percentage}%</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">📋 Assessment</div>
+                    <div class="result-value">${analysis.assessment}</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">📊 Bristol Type</div>
+                    <div class="result-value">${analysis.bristol_type}</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">💚 Health Status</div>
+                    <div class="result-value ${statusClass}">${analysis.health_status.toUpperCase()}</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">📅 Analyzed</div>
+                    <div class="result-value">${data.upload_time}</div>
+                </div>
+            `;
+            
+            results.classList.add('show');
+        }
+    </script>
+</body>
+</html>
