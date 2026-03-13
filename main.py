@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from anthropic import Anthropic
@@ -11,6 +12,27 @@ load_dotenv()
 
 app = FastAPI()
 client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+# Configure CORS - Allow network access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:5175",
+        "http://192.168.1.7:5173",
+        "http://192.168.1.7:5174",
+        "http://192.168.1.7:5175",
+        # Allow all origins in local network for mobile access
+        "*",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

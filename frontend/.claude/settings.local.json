@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(python -c:*)",
+      "Bash(curl:*)",
+      "Bash(ipconfig:*)",
+      "Bash(findstr:*)"
+    ]
+  }
+}
