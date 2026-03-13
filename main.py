@@ -34,11 +34,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="frontend/dist/assets"), name="static")
 
 @app.get("/")
 async def read_root():
-    return FileResponse("static/index.html")
+    return FileResponse("frontend/dist/index.html")
 
 @app.post("/upload")
 async def analyze_poop(file: UploadFile = File(...)):
