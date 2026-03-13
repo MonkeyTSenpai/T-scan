@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="frontend/dist/assets"), name="static")
+app.mount("/static", StaticFiles(directory="frontend/dist/assets"), name="assets")
 
 @app.get("/")
 async def read_root():
